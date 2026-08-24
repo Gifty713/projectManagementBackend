@@ -15,7 +15,7 @@ const createInviteCodes =async(req, res)=>{
             WHERE project_id = $1
         `, [project_id]);
         // validate resultProject
-        if (resultProject.rows[0].length === 0) return res.status(404).json({message:"This project was not found."});
+        if (resultProject.rows.length === 0) return res.status(404).json({message:"This project was not found."});
 
         // validate if user is Admin
         const resultAdmin = await pool.query(`
@@ -36,6 +36,11 @@ const createInviteCodes =async(req, res)=>{
 
         // create invite code 
         let invite_code = nanoid(10);
+        if (!redisClient.isReady) {
+            return res.status(503).json({
+                message: "Invite codes are temporarily unavailable."
+            });
+        }
         // validate if unique
         let  exists = await redisClient.exists(`invite:${invite_code}`);
         while (exists){
@@ -61,6 +66,11 @@ const createInviteCodes =async(req, res)=>{
 
 const inviteMember= async(req,res)=>{
     try {
+        if (!redisClient.isReady) {
+            return res.status(503).json({
+                message: "Invite codes are temporarily unavailable."
+            });
+        }
         const {invite_code} = req.body;
         const user_id = req.user;
         // validate invite link
@@ -93,7 +103,7 @@ const editMember = async(req, res)=>{
             FROM members 
             WHERE project_id = $1 AND user_id = $2 AND (role = 'Admin' OR role = 'Project Manager')
         `, [project_id, admin_id]);
-        if (resultAdmin.rows[0].length === 0) return res.status(401).json({message:"You are not permitted to edit members."});
+        if (resultAdmin.rows.length === 0) return res.status(401).json({message:"You are not permitted to edit members."});
         
         // role validation again
         const validRoles = [

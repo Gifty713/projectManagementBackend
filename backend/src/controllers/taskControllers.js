@@ -15,7 +15,7 @@ const createTask = async(req,res)=>{
             )  
         `,[project_id]);     
 
-        if(!foundProject) return(res.status(404).json({message:"Can't find this project, enter valid project id."})); 
+        if(!foundProject.rows[0].exists) return(res.status(404).json({message:"Can't find this project, enter valid project id."})); 
 
         // validating due date
         const today = new Date();
@@ -50,7 +50,13 @@ const createTask = async(req,res)=>{
         if (num > 0){
             task_named = task_named + String(num);
         };
-
+        // checking if admin, project manager, team manager
+        const resultAdmin = await pool.query(`
+            SELECT *
+            FROM members 
+            WHERE project_id = $1 AND user_id = $2 AND role = 'Team Member'
+        `, [project_id, user_id]);
+        if (resultAdmin.rows.length > 0) return res.status(401).json({message:"You are not permitted to create task."});
         // create task
         const result = await pool.query(`
             INSERT INTO tasks(task_name, due_date, assigned_to, project_parent)
@@ -73,14 +79,22 @@ const editTask = async(req, res)=>{
 
         // valiidating task id
         const foundTask = await pool.query(`
-            SELECT EXISTS(
-                SELECT 1
-                FROM tasks
-                WHERE task_id = $1              
-            )  
+            SELECT *
+            FROM tasks
+            WHERE task_id = $1                 
         `,[task_id]);     
 
-        if(!foundTask) return(res.status(404).json({message:"Can't find this task, enter valid project id."})); 
+        if(foundTask.rows.length === 0) return(res.status(404).json({message:"Can't find this task, enter valid task id."})); 
+        // get project parent
+        const project_id = foundTask.rows[0].project_parent;
+        // checking if admin, project manager, team manager
+        const resultAdmin = await pool.query(`
+            SELECT *
+            FROM members 
+            WHERE project_id = $1 AND user_id = $2 AND role = "Team Member"
+        `, [project_id, user_id]);
+        if (resultAdmin.rows.length > 0) return res.status(401).json({message:"You are not permitted to edit task."});
+        
         // validating due date
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -131,17 +145,26 @@ const editTask = async(req, res)=>{
 
 const deleteTask = async(req,res)=>{
     try {
-        const task_id = req.params.task_id;
-        // validate if this project is available
-        const foundtask = await pool.query(`
-            SELECT EXISTS(
-                SELECT 1
-                FROM tasks
-                WHERE task_id = $1              
-            )  
+        const user_id = req.user;
+        const task_id = req.params.task_id;     
+        // valiidating task id
+        const foundTask = await pool.query(`
+            SELECT *
+            FROM tasks
+            WHERE task_id = $1                 
         `,[task_id]);     
 
-        if(!foundtask) return(res.status(404).json({message:"Can't find this task, enter valid task id."})); 
+        if(foundTask.rows.length === 0) return(res.status(404).json({message:"Can't find this task, enter valid task id."})); 
+        // get project parent
+        const project_id = foundTask.rows[0].project_parent;
+        // checking if admin, project manager, team manager
+        const resultAdmin = await pool.query(`
+            SELECT *
+            FROM members 
+            WHERE project_id = $1 AND user_id = $2 AND role = "Team Member"
+        `, [project_id, user_id]);
+        if (resultAdmin.rows.length > 0) return res.status(401).json({message:"You are not permitted to edit task."});
+
         // delete task
         const result = await pool.query(`
             DELETE FROM tasks
@@ -158,23 +181,41 @@ const changeStatus = async(req, res)=>{
     try {
         const {status}= req.body;
         const user_id = req.user;
-        const project_id = req.params.project_id;
+        const task_id = req.params.task_id;
         // validate status
         const validStatus = ["In progress", "Done", "Approved"];
         if (!validStatus.includes(status)) return res.status(400).json({message:"This task status is not a valid status."});
-        // check if this user is permitted to change the status to this level
-        // find this user in member id and check role
-        const resultMember = await pool.query(`
+        
+        // check if task is valid
+        // valiidating task id
+        const foundTask = await pool.query(`
             SELECT *
-            FROM members
-            WHERE user_id = $1 AND project_id = $2         
-        `,[user_id, project_id]);
-        const result = resultMember.rows;
+            FROM tasks
+            WHERE task_id = $1                 
+        `,[task_id]);     
+
+        if(foundTask.rows.length === 0) return(res.status(404).json({message:"Can't find this task, enter valid task id."})); 
+        // get project parent
+        const project_id = foundTask.rows[0].project_parent;
+        // checking if admin, project manager, team manager
+        const resultAdmin = await pool.query(`
+            SELECT *
+            FROM members 
+            WHERE project_id = $1 AND user_id = $2 
+        `, [project_id, user_id]);
+        if (resultAdmin.rows.length === 0) return res.status(401).json({message:"You are not permitted to edit task."});
+        const result = resultAdmin.rows;
         const role = result[0].role;
         // Any assigned member (team member, team manager, project manager or admin) 
         // can change a status from to do->in progress->done, but only team managers, project manager or admin can change a project from done -> approved 
         if (role === "Team Member" && status === "Approved") res.status(401).json({message:"You are not authorized to change the status to approved."});
         
+        // update
+        await pool.query(`
+            UPDATE tasks
+            SET task_status = $1
+            WHERE task_id = $2
+        `,[status, task_id]);
         res.status(200).json({messag:"Status successfully to: ", status});
     } catch (error) {
         res.status(500).json({message:"Internal server error, error in changing task status.", error:error.message});                       

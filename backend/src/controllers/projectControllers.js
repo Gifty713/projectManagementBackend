@@ -75,7 +75,7 @@ const getParticularProject = async(req, res)=>{
             WHERE project_id = $1
         `, [project_id]);
         // validate result
-        if (result.rows[0].length === 0) res.status(404).json({message:"This project was not found."});
+        if (result.rows.length === 0) res.status(404).json({message:"This project was not found."});
         // return result
         res.status(200).json({message:"Project found: ", result:result.rows[0]});
     } catch (error) {
@@ -85,6 +85,7 @@ const getParticularProject = async(req, res)=>{
 
 const deleteProject = async(req,res)=>{
     try {
+        const user_id = req.user;
         const project_id = req.params.id;
         // validate if this project is available
         const foundProject = await pool.query(`
@@ -96,6 +97,13 @@ const deleteProject = async(req,res)=>{
         `,[project_id]);     
 
         if(!foundProject.rows.exists) return(res.status(404).json({message:"Can't find this project, enter valid project id."})); 
+        // check if admin or project manager
+        const resultAdmin = await pool.query(`
+            SELECT *
+            FROM members 
+            WHERE project_id = $1 AND user_id = $2 AND (role = 'Admin' or role ='Project Manager')
+        `, [project_id, user_id]);
+        if (resultAdmin.rows.length === 0) return res.status(401).json({message:"You are not permitted to delete this project."});
         // delete project
         const result = await pool.query(`
             DELETE FROM projects

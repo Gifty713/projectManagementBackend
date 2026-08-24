@@ -76,6 +76,7 @@ const particularWorkspace=async(req,res)=>{
 const deleteWorkspace = async(req,res)=>{
     try {
         const workspace_id = req.params.id;
+        const user_id = req.user;
         // validate if this workspace is available
         const foundWorkspace = await pool.query(`
             SELECT EXISTS(
@@ -86,6 +87,14 @@ const deleteWorkspace = async(req,res)=>{
         `,[workspace_id]);     
 
         if(!foundWorkspace) return(res.status(404).json({message:"Can't find this workspace, enter valid workspace id."})); 
+        // validate if admin
+        const resultAdmin = await pool.query(`
+            SELECT *
+            FROM workspaces 
+            WHERE workspace_id = $1 AND created_by = $2 
+        `, [workspace_id, user_id]);
+        if (resultAdmin.rows.length === 0) return res.status(401).json({message:"You are not permitted to delete this workspace."});
+
         // delete workspace
         const result = await pool.query(`
             DELETE FROM workspaces

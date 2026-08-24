@@ -8,6 +8,6 @@ memberRoute.route("/createinvitecodes/:id").post(authToken, createInviteCodes);
 memberRoute.route("/invitemember").post(authToken, inviteMember);
 memberRoute.route("/editmember/:id").patch(authToken, editMember);
 memberRoute.route("/deletemember/:id").delete(authToken, deleteMember);
-memberRoute.route("/getmembers").get(authToken, deleteMember);
+memberRoute.route("/getmembers").get(authToken, getMembers);
 
 export default memberRoute;

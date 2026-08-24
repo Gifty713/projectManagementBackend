@@ -1,9 +1,10 @@
-import {app} from "./app.js";
 import dotenv from "dotenv";
 
 dotenv.config({
     path:"./.env"
 })
+
+const {app, httpServer} = await import("./app.js");
 
 const startServer=async()=>{
     try {
@@ -11,7 +12,7 @@ const startServer=async()=>{
             console.log("Error occurred: ", error);
             throw error;
         });       
-        app.listen(process.env.PORT || 8000, ()=>{
+        httpServer.listen(process.env.PORT || 8000, ()=>{
             console.log(`Connection successful on port ${process.env.PORT}`)
         });
  

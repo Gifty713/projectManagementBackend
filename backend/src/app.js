@@ -10,18 +10,17 @@ import memberRoute from "./routes/memberRoutes.js";
 import taskRoute from "./routes/taskRoutes.js";
 import commentRoute from "./routes/commentRoutes.js";
 import dotenv from "dotenv";
-
-dotenv.config({
-    path:"./.env"
-})
-
+import cookieParser from "cookie-parser"; 
+// App config
 const app = express();
 app.use(express.json());
 app.use(cors(
-    {origin:"http://localhost:5173", credentials:true}
+    {origin: process.env.FRONTEND_ORIGIN, credentials:true}
 ));
+app.use(cookieParser());
+// SOcket connection
 const httpServer = createServer(app);
-const io = new Server(httpServer, {cors:{origin:"*"}});
+const io = new Server(httpServer, {cors:{origin: process.env.FRONTEND_ORIGIN, credentials:true}});
 
 app.use((req, res, next)=>{
     req.io = io;
@@ -49,4 +48,4 @@ app.use("/api/v1/members", memberRoute);
 app.use("/api/v1/tasks", taskRoute);
 app.use("/api/v1/comments", commentRoute);
 
-export {app, resend};
+export {app, httpServer, resend};
