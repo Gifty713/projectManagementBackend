@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "the backend of my project manager app",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "author": "YoungAgain",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.1",
+    "jsonwebtoken": "^9.0.3",
+    "nanoid": "^6.0.0",
+    "nodemon": "^3.1.14",
+    "pg": "^8.22.0",
+    "redis": "^6.2.0",
+    "resend": "^6.19.0",
+    "socket.io": "^4.8.3"
+  }
+}
