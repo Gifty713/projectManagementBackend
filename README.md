@@ -26,14 +26,19 @@ The project management app is used to enable members collaborate and in real tim
 
 Database Structure:
   Users
+  
      |
      |____Workspaces
+	 
          |
          |
          |____Projects
-		          |_____Tasks
+		 
+		      |_____Tasks
+			  
               |
               |_____Comments
+			  
               |
               |_____Project Members
 
