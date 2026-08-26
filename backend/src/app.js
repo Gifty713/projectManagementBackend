@@ -16,9 +16,6 @@ import swaggerSpec from "./config/swagger.js";
 // App config
 const app = express();
 app.use(express.json());
-app.use(cors(
-    {origin: process.env.FRONTEND_ORIGIN, credentials:true}
-));
 app.use(cookieParser());
 // SOcket connection
 const httpServer = createServer(app);
