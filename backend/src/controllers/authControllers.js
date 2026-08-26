@@ -132,10 +132,12 @@ const logout= async(req,res)=>{
             .join("=");
         if (token){
             const tokenHashed = crypto.hash("sha256", token, "hex");
-            await pool.query(`
+            const deleted = await pool.query(`
                 DELETE FROM refresh_tokens  WHERE hashed_token = $1
+                RETURNING refresh_id
             `, [tokenHashed]
-            );            
+            );          
+            if (!deleted.rows[0]) return res.status(404).json({message:"Token not found"});  
         };
         res
             .clearCookie("accessToken", cookieOptions)

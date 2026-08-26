@@ -11,6 +11,8 @@ import taskRoute from "./routes/taskRoutes.js";
 import commentRoute from "./routes/commentRoutes.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser"; 
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 // App config
 const app = express();
 app.use(express.json());
@@ -40,6 +42,16 @@ io.on("connection", (socket)=>{
 
 // resend config
 const resend = new Resend(process.env.RESEND_KEY);
+
+// Swagger connection
+app.use("/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(
+        swaggerSpec, {swaggerOptions:{
+            withCredentials: true
+        }
+    })
+);
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/workspace", workspaceRoute);

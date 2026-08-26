@@ -91,7 +91,7 @@ const editTask = async(req, res)=>{
         const resultAdmin = await pool.query(`
             SELECT *
             FROM members 
-            WHERE project_id = $1 AND user_id = $2 AND role = "Team Member"
+            WHERE project_id = $1 AND user_id = $2 AND role = 'Team Member'
         `, [project_id, user_id]);
         if (resultAdmin.rows.length > 0) return res.status(401).json({message:"You are not permitted to edit task."});
         
@@ -161,7 +161,7 @@ const deleteTask = async(req,res)=>{
         const resultAdmin = await pool.query(`
             SELECT *
             FROM members 
-            WHERE project_id = $1 AND user_id = $2 AND role = "Team Member"
+            WHERE project_id = $1 AND user_id = $2 AND role = 'Team Member'
         `, [project_id, user_id]);
         if (resultAdmin.rows.length > 0) return res.status(401).json({message:"You are not permitted to edit task."});
 

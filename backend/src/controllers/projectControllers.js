@@ -96,7 +96,7 @@ const deleteProject = async(req,res)=>{
             )  
         `,[project_id]);     
 
-        if(!foundProject.rows.exists) return(res.status(404).json({message:"Can't find this project, enter valid project id."})); 
+        if(!foundProject.rows[0].exists) return(res.status(404).json({message:"Can't find this project, enter valid project id."})); 
         // check if admin or project manager
         const resultAdmin = await pool.query(`
             SELECT *
@@ -104,6 +104,11 @@ const deleteProject = async(req,res)=>{
             WHERE project_id = $1 AND user_id = $2 AND (role = 'Admin' or role ='Project Manager')
         `, [project_id, user_id]);
         if (resultAdmin.rows.length === 0) return res.status(401).json({message:"You are not permitted to delete this project."});
+        // delete members
+        const resultM = await pool.query(`
+            DELETE FROM members
+            WHERE project_id = $1
+        `, [project_id]);       
         // delete project
         const result = await pool.query(`
             DELETE FROM projects

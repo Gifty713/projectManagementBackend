@@ -97,6 +97,17 @@ const editMember = async(req, res)=>{
         const admin_id = req.user;
         const project_id = req.params.id;
         const {role, user_id} = req.body;
+        // project_id validation
+        const foundProject = await pool.query(`
+            SELECT EXISTS(
+                SELECT 1
+                FROM projects
+                WHERE project_id = $1              
+            )  
+        `,[project_id]);     
+
+        if(!foundProject.rows[0].exists) return(res.status(404).json({message:"Can't find this project, enter valid project id."})); 
+
         // check if the admin or project manager requesting this
         const resultAdmin = await pool.query(`
             SELECT *
@@ -131,6 +142,17 @@ const deleteMember = async(req, res)=>{
         const user_id = req.user;
         const project_id = req.params.id;
         const {member_id} = req.body;
+        // project_id validation
+        const foundProject = await pool.query(`
+            SELECT EXISTS(
+                SELECT 1
+                FROM projects
+                WHERE project_id = $1              
+            )  
+        `,[project_id]);     
+
+        if(!foundProject.rows[0].exists) return(res.status(404).json({message:"Can't find this project, enter valid project id."})); 
+
         // check if the admin or project manager requesting this
         const resultAdmin = await pool.query(`
             SELECT *
@@ -152,7 +174,7 @@ const deleteMember = async(req, res)=>{
 
 const getMembers = async(req, res)=>{
     try {
-        const {project_id} = req.body;
+        const project_id = req.params.project_id;
         // validate project_id 
         const resultProject = await pool.query(`
             SELECT * 
@@ -160,15 +182,15 @@ const getMembers = async(req, res)=>{
             WHERE project_id = $1
         `, [project_id]);
         // validate result
-        if (resultProject.rows[0].length === 0) res.status(404).json({message:"This project was not found."});
+        if (resultProject.rows.length === 0) return(res.status(404).json({message:"This project was not found."}));
 
         // find users
         const resultUser = await pool.query(`
-            SELECT user_id 
+            SELECT user_id, role 
             FROM members
             WHERE project_id = $1    
         `,[project_id]);
-        const user_ids = resultUser.rows[0];
+        const user_ids = resultUser.rows.map(row=>[row.user_id, row.role]);
 
         // use user ids to get members
         res.status(200).json({message:"Successful", user_ids}); 

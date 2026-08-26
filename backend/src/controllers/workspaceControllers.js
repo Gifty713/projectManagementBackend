@@ -58,7 +58,7 @@ const getWorkspaces = async(req, res)=>{
 
 const particularWorkspace=async(req,res)=>{
     try {
-        const workspace_id = req.params.id;
+        const workspace_id = req.params.workspace_id;
         // select the workspace with the same id
         const result = await pool.query(`
             SELECT *
@@ -75,7 +75,7 @@ const particularWorkspace=async(req,res)=>{
 
 const deleteWorkspace = async(req,res)=>{
     try {
-        const workspace_id = req.params.id;
+        const workspace_id = req.params.workspace_id;
         const user_id = req.user;
         // validate if this workspace is available
         const foundWorkspace = await pool.query(`
