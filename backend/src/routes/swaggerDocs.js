@@ -340,7 +340,7 @@
  *     summary: Add a comment to a project
  *     security: [{ cookieAuth: [] }]
  *     parameters:
- *       - $ref: '#/components/parameters/ProjectIdPath'
+ *       - $ref: '#/components/parameters/ProjectId'
  *     requestBody:
  *       required: true
  *       content:
@@ -350,7 +350,7 @@
  *             required: [comment]
  *             properties:
  *               comment: { type: string, example: Please review the latest changes. }
- *               mentionId: { type: integer, example: 7 }
+ *               mentionId: { type: integer, example: abc-123 }
  *     responses:
  *       200: { description: Comment created }
  *
@@ -360,7 +360,7 @@
  *     summary: List comments for a project
  *     security: [{ cookieAuth: [] }]
  *     parameters:
- *       - $ref: '#/components/parameters/ProjectIdPath'
+ *       - $ref: '#/components/parameters/ProjectId'
  *     responses:
  *       200: { description: Comment list }
  *
