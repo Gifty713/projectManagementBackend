@@ -25,8 +25,8 @@ Core Features Explained:
 The project management app is used to enable members collaborate and in real time update themselves of the outcomes of the project.
 
 Database Structure:
-  Users
   
+  Users
      |
      |____Workspaces
 	 
