@@ -44,10 +44,9 @@ Database Structure:
 Authentication & Users:
 The API provides authentication and user-related functionality.
 Typical capabilities include:
-- User registration
+-User registration
 -User login
 -User logout
-
 -Authentication validation
 -Refreshing authentication sessions
 
