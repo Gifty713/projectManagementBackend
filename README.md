@@ -34,11 +34,9 @@ Database Structure:
          |
          |____Projects
 		 
-		      |_____Tasks
-			  
+		      |_____Tasks			  
               |
-              |_____Comments
-			  
+              |_____Comments			  
               |
               |_____Project Members
 
