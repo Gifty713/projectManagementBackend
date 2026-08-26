@@ -22,7 +22,7 @@
  *             properties:
  *               firstName: { type: string, example: Nana }
  *               lastName: { type: string, example: Kennedy }
- *               email: { type: string, format: email, example: Nana@example.com }
+ *               email: { type: string, format: email, example: nana@example.com }
  *               password: { type: string, format: password, example: password123 }
  *     responses:
  *       201: { description: User created }
@@ -40,7 +40,7 @@
  *             type: object
  *             required: [email, password]
  *             properties:
- *               email: { type: string, format: email, example: Nana@example.com }
+ *               email: { type: string, format: email, example: nana@example.com }
  *               password: { type: string, format: password, example: password123 }
  *     responses:
  *       200: { description: Login successful }

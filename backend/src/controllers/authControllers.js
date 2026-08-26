@@ -16,12 +16,13 @@ const register=async(req, res)=>{
         // Validation 
         if (!firstName || !lastName || !email || !password) return res.status(400).json({message:"All fields are required."});
 
+        const emaill = email.toLowerCase();
         const foundEmail = await pool.query(`
           SELECT EXISTS(
             SELECT 1 FROM users
             WHERE email = $1
           )  
-        `, [email] 
+        `, [emaill] 
         )
         if (foundEmail.rows[0].exists)return res.status(400).json({message:"This user already exists."});
         // hashing password 
@@ -32,7 +33,7 @@ const register=async(req, res)=>{
             INSERT INTO users(first_name, last_name, email, password)
             VALUES ($1, $2, $3, $4)
             RETURNING first_name, last_name, email     
-        `, [firstName, lastName, email, hashedPassword]
+        `, [firstName, lastName, emaill, hashedPassword]
         );
 
         // Creating accessToken and Refresh Token 

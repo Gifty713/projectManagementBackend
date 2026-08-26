@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 // SOcket connection
 const httpServer = createServer(app);
-const io = new Server(httpServer, {cors:{origin: process.env.FRONTEND_ORIGIN, credentials:true}});
+const io = new Server(httpServer, {cors:{origin: "*", credentials:true}});
 
 app.use((req, res, next)=>{
     req.io = io;
