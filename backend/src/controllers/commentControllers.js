@@ -44,7 +44,7 @@ const newComment=async(req, res)=>{
                 );
                 if (!userIsOnline){
                     const {data, error} = await resend.emails.send({
-                        from:"My APi <>",
+                        from:"MyProjectManager <noreply@send.myprojectman.top>",
                         to: [`${resultEmail}`],
                         subject:"Somebody mentioned you."
                     })
