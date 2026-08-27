@@ -27,7 +27,8 @@ const newComment=async(req, res)=>{
               )  
             `,[mentionId, project_id]);
             if (!resultExists.rows[0].exists) return res.status(404).json({message:"Couldn't find said user in this project."});
-            
+        
+
             // find user email
             const resultUser = await pool.query(`
               SELECT *
@@ -35,8 +36,7 @@ const newComment=async(req, res)=>{
               WHERE id = $1
             `, [mentionId]);
             const resultEmail = resultUser.rows[0].email;
-
-            // if user not online in 1 hour then send email
+            // if mentioned user not online in 1 hour then send email
             setTimeout(async()=>{
                 const sockets = await req.io.fetchSockets();
                 const userIsOnline = sockets.some(
@@ -45,8 +45,12 @@ const newComment=async(req, res)=>{
                 if (!userIsOnline){
                     const {data, error} = await resend.emails.send({
                         from:"MyProjectManager <noreply@send.myprojectman.top>",
-                        to: [`${resultEmail}`],
-                        subject:"Somebody mentioned you."
+                        to: [resultEmail],
+                        subject:"Somebody mentioned you.",
+                        html: `
+                            <h2>You were mentioned in a comment</h2>
+                            <p>Someone mentioned you in a project.</p>
+                        `
                     })
                     if (error) {
                         console.error("Error in sending email.", error);
